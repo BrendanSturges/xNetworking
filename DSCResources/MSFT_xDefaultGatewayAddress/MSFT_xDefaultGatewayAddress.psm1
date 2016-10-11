@@ -56,7 +56,7 @@ function Get-TargetResource
     }
     # Get all the default routes
     $defaultRoutes = Get-NetRoute -InterfaceAlias $InterfaceAlias -AddressFamily `
-        $AddressFamily -ErrorAction Stop | `
+        $AddressFamily -ErrorAction Continue | `
         Where-Object { $_.DestinationPrefix -eq $DestinationPrefix }
 
     $returnValue = @{
@@ -110,7 +110,7 @@ function Set-TargetResource
     $defaultRoutes = @(Get-NetRoute `
         -InterfaceAlias $InterfaceAlias `
         -AddressFamily $AddressFamily `
-        -ErrorAction Stop).Where( { $_.DestinationPrefix -eq $DestinationPrefix } )
+        -ErrorAction Continue).Where( { $_.DestinationPrefix -eq $DestinationPrefix } )
 
     # Remove any existing default route
     foreach ($defaultRoute in $defaultRoutes) {
@@ -119,7 +119,7 @@ function Set-TargetResource
             -NextHop $defaultRoute.NextHop `
             -InterfaceIndex $defaultRoute.InterfaceIndex `
             -AddressFamily $defaultRoute.AddressFamily `
-            -Confirm:$false -ErrorAction Stop
+            -Confirm:$false -ErrorAction Continue
     }
 
     if ($Address)
@@ -133,7 +133,7 @@ function Set-TargetResource
             NextHop = $Address
         }
 
-        New-NetRoute @Parameters -ErrorAction Stop
+        New-NetRoute @Parameters -ErrorAction Continue
 
         Write-Verbose -Message ( @("$($MyInvocation.MyCommand): "
             $($LocalizedData.DefaultGatewayAddressSetToDesiredStateMessage)
@@ -186,7 +186,7 @@ function Test-TargetResource
     $defaultRoutes = @(Get-NetRoute `
         -InterfaceAlias $InterfaceAlias `
         -AddressFamily $AddressFamily `
-        -ErrorAction Stop).Where( { $_.DestinationPrefix -eq $DestinationPrefix } )
+        -ErrorAction Continue).Where( { $_.DestinationPrefix -eq $DestinationPrefix } )
 
     # Test if the Default Gateway passed is equal to the current default gateway
     if ($Address)

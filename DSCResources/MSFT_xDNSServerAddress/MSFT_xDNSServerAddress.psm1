@@ -91,7 +91,7 @@ function Set-TargetResource
     $PSBoundParameters.Remove('Address')
     $PSBoundParameters.Remove('Validate')
     $currentAddress = (Get-DnsClientServerAddress @PSBoundParameters `
-        -ErrorAction Stop).ServerAddresses
+        -ErrorAction Continue).ServerAddresses
 
     #Check if the Server addresses are the same as the desired addresses.
     [Boolean] $addressDifferent = (@(Compare-Object `
@@ -108,7 +108,7 @@ function Set-TargetResource
             Validate = $Validate
         }
         Set-DnsClientServerAddress @Splat `
-            -ErrorAction Stop
+            -ErrorAction Continue
 
         Write-Verbose -Message ( @( "$($MyInvocation.MyCommand): "
             $($LocalizedData.DNSServersHaveBeenSetCorrectlyMessage)
@@ -165,7 +165,7 @@ function Test-TargetResource
     $currentAddress = (Get-DnsClientServerAddress `
         -InterfaceAlias $InterfaceAlias `
         -AddressFamily $AddressFamily `
-        -ErrorAction Stop).ServerAddresses
+        -ErrorAction Continue).ServerAddresses
 
     #Check if the Server addresses are the same as the desired addresses.
     [Boolean] $addressDifferent = (@(Compare-Object `

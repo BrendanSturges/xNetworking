@@ -106,7 +106,7 @@ function Set-TargetResource
     $defaultRoutes = @(Get-NetRoute `
         -InterfaceAlias $InterfaceAlias `
         -AddressFamily $AddressFamily `
-        -ErrorAction Stop).Where( { $_.DestinationPrefix -eq $DestinationPrefix } )
+        -ErrorAction Continue).Where( { $_.DestinationPrefix -eq $DestinationPrefix } )
 
     # Remove any default routes on the specified interface -- it is important to do
     # this *before* removing the IP address, particularly in the case where the IP
@@ -120,7 +120,7 @@ function Set-TargetResource
                 -InterfaceIndex $defaultRoute.InterfaceIndex `
                 -AddressFamily $defaultRoute.AddressFamily `
                 -Confirm:$false `
-                -ErrorAction Stop
+                -ErrorAction Continue
         }
     }
 
@@ -128,7 +128,7 @@ function Set-TargetResource
     $currentIPs = @(Get-NetIPAddress `
         -InterfaceAlias $InterfaceAlias `
         -AddressFamily $AddressFamily `
-        -ErrorAction Stop)
+        -ErrorAction Continue)
 
     # Remove any IP addresses on the specified interface
     if ($currentIPs)
@@ -139,7 +139,7 @@ function Set-TargetResource
                 -InterfaceIndex $CurrentIP.InterfaceIndex `
                 -AddressFamily $CurrentIP.AddressFamily `
                 -Confirm:$false `
-                -ErrorAction Stop
+                -ErrorAction Continue
         }
     }
 
@@ -151,7 +151,7 @@ function Set-TargetResource
     }
 
     # Apply the specified IP configuration
-    $null = New-NetIPAddress @Parameters -ErrorAction Stop
+    $null = New-NetIPAddress @Parameters -ErrorAction Continue
 
     Write-Verbose -Message ( @("$($MyInvocation.MyCommand): "
         $($LocalizedData.IPAddressSetStateMessage)
@@ -191,25 +191,10 @@ function Test-TargetResource
     Test-ResourceProperty @PSBoundParameters
 
     # Get the current IP Address based on the parameters given.
-     # First make sure that adapter is available
-    [Boolean] $adapterBindingReady = $false
-    [DateTime] $startTime = Get-Date 
-
-    while (-not $adapterBindingReady -and (((Get-Date) - $startTime).TotalSeconds) -lt 30)
-    {      
-        $currentIPs = @(Get-NetIPAddress `
-            -InterfaceAlias $InterfaceAlias `
-            -AddressFamily $AddressFamily `
-            -ErrorAction SilentlyContinue)
-        if ($currentIPs)
-        {
-            $adapterBindingReady = $true
-        }
-        else
-        {
-            Start-Sleep -Milliseconds 200
-        }
-    } # while
+    $currentIPs = @(Get-NetIPAddress `
+        -InterfaceAlias $InterfaceAlias `
+        -AddressFamily $AddressFamily `
+        -ErrorAction Continue)
 
     # Test if the IP Address passed is present
     if ($IPAddress -notin $currentIPs.IPAddress)
